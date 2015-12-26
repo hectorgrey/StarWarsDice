@@ -1,0 +1,8 @@
+[package]
+name = "star_wars_dice"
+version = "0.1.0"
+authors = ["Chris Parker <chp35@aber.ac.uk>"]
+
+[dependencies]
+
+rand="0.3"
