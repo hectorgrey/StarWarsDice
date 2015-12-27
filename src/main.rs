@@ -21,7 +21,6 @@ enum DieValue {
     DarkDark,
     Light,
     LightLight,
-    Numeric(u8),
 }
 
 struct AbilityDie;
@@ -31,15 +30,13 @@ struct DifficultyDie;
 struct ChallengeDie;
 struct SetbackDie;
 struct ForceDie;
-struct D10;
-struct D100;
 
 trait Die {
-    fn roll () -> DieValue;
+    fn roll() -> DieValue;
 }
 
 impl Die for AbilityDie {
-    fn roll () -> DieValue {
+    fn roll() -> DieValue {
         let result = rand::thread_rng().gen_range(1, 9);
         match result {
             1     => DieValue::Blank,
@@ -53,7 +50,7 @@ impl Die for AbilityDie {
 }
 
 impl Die for ProficiencyDie {
-    fn roll () -> DieValue {
+    fn roll() -> DieValue {
         let result = rand::thread_rng().gen_range(1, 13);
         match result {
             1       => DieValue::Blank,
@@ -68,7 +65,7 @@ impl Die for ProficiencyDie {
 }
 
 impl Die for BoostDie {
-    fn roll () -> DieValue {
+    fn roll() -> DieValue {
         let result = rand::thread_rng().gen_range(1, 7);
         match result {
             1 | 2 => DieValue::Blank,
@@ -81,7 +78,7 @@ impl Die for BoostDie {
 }
 
 impl Die for DifficultyDie {
-    fn roll () -> DieValue {
+    fn roll() -> DieValue {
         let result = rand::thread_rng().gen_range(1, 9);
         match result {
             1         => DieValue::Blank,
@@ -95,7 +92,7 @@ impl Die for DifficultyDie {
 }
 
 impl Die for ChallengeDie {
-    fn roll () -> DieValue {
+    fn roll() -> DieValue {
         let result = rand::thread_rng().gen_range(1, 13);
         match result {
             1       => DieValue::Blank,
@@ -110,7 +107,7 @@ impl Die for ChallengeDie {
 }
 
 impl Die for SetbackDie {
-    fn roll () -> DieValue {
+    fn roll() -> DieValue {
         let result = rand::thread_rng().gen_range(1, 7);
         match result {
             1 | 2 => DieValue::Blank,
@@ -121,7 +118,7 @@ impl Die for SetbackDie {
 }
 
 impl Die for ForceDie {
-    fn roll () -> DieValue {
+    fn roll() -> DieValue {
         let result = rand::thread_rng().gen_range(1, 13);
         match result {
             1 ... 6 => DieValue::Dark,
@@ -129,18 +126,6 @@ impl Die for ForceDie {
             8 ... 9 => DieValue::Light,
             _       => DieValue::LightLight,
         }
-    }
-}
-
-impl Die for D10 {
-    fn roll() -> DieValue {
-        DieValue::Numeric(rand::thread_rng().gen_range(1, 11))
-    }
-}
-
-impl Die for D100 {
-    fn roll() -> DieValue {
-        DieValue::Numeric(rand::thread_rng().gen_range(1, 101))
     }
 }
 
@@ -163,34 +148,140 @@ fn main() {
 
 fn normal_roll() {
     let mut input = String::new();
+
     println!("How many Ability dice (green d8) do you require?");
     io::stdin().read_line(&mut input).expect("Failed to read input");
     let ability: u8 = input.trim().parse().expect("Expected a number.");
+    input.clear();
+
     println!("How many Proficiency dice (yellow d12) do you require?");
     io::stdin().read_line(&mut input).expect("Failed to read input");
     let proficiency: u8 = input.trim().parse().expect("Expected a number.");
+    input.clear();
+
     println!("How many Boost dice (blue d6) do you require?");
     io::stdin().read_line(&mut input).expect("Failed to read input");
     let boost: u8 = input.trim().parse().expect("Expected a number.");
+    input.clear();
+
     println!("How many Difficulty dice (purple d8) do you require?");
     io::stdin().read_line(&mut input).expect("Failed to read input");
     let difficulty: u8 = input.trim().parse().expect("Expected a number.");
+    input.clear();
+
     println!("How many Challenge dice (red d12) do you require?");
     io::stdin().read_line(&mut input).expect("Failed to read input");
     let challenge: u8 = input.trim().parse().expect("Expected a number.");
+    input.clear();
+
     println!("How many Setback dice (black d6) do you require?");
     io::stdin().read_line(&mut input).expect("Failed to read input");
     let setback: u8 = input.trim().parse().expect("Expected a number.");
+    input.clear();
+
     println!("How many Force dice (white d12) do you require?");
     io::stdin().read_line(&mut input).expect("Failed to read input");
     let force: u8 = input.trim().parse().expect("Expected a number.");
+    input.clear();
+
+    let mut hand = Vec::new();
+
+    for _ in 0..ability {
+        hand.push(AbilityDie::roll());
+    }
+
+    for _ in 0..proficiency {
+        hand.push(ProficiencyDie::roll());
+    }
+
+    for _ in 0..boost {
+        hand.push(BoostDie::roll());
+    }
+
+    for _ in 0..difficulty {
+        hand.push(DifficultyDie::roll());
+    }
+
+    for _ in 0..challenge {
+        hand.push(ChallengeDie::roll());
+    }
+
+    for _ in 0..setback {
+        hand.push(SetbackDie::roll());
+    }
+
+    for _ in 0..force {
+        hand.push(ForceDie::roll());
+    }
+
+    let mut advantage = 0;
+    let mut success = 0;
+    let mut triumph = 0;
+    let mut light = 0;
+    let mut threat = 0;
+    let mut failure = 0;
+    let mut dispair = 0;
+    let mut dark = 0;
+
+    for die in hand {
+        match die {
+            DieValue::Advantage          => advantage += 1,
+            DieValue::Success            => success += 1,
+            DieValue::AdvantageSuccess   => {advantage += 1; success += 1;},
+            DieValue::AdvantageAdvantage => advantage += 2,
+            DieValue::SuccessSuccess     => success += 2,
+            DieValue::Triumph            => triumph += 1,
+            DieValue::Threat             => threat += 1,
+            DieValue::Failure            => failure += 1,
+            DieValue::ThreatFailure      => {threat += 1; failure += 1},
+            DieValue::ThreatThreat       => threat += 2,
+            DieValue::FailureFailure     => failure += 2,
+            DieValue::Dispair            => dispair += 1,
+            DieValue::Dark               => dark += 1,
+            DieValue::DarkDark           => dark += 2,
+            DieValue::Light              => light += 1,
+            DieValue::LightLight         => light += 2,
+            _                            => {},
+        }
+    }
+
+    println!("You rolled {} successes, {} advantage, {} triumphs,",
+             success, advantage, triumph);
+    println!("{} failures, {} threat, {} dispair,",
+             failure, threat, dispair);
+    println!("{} lightside force points and {} dark side force points.",
+             light, dark);
 }
 
 fn d10_roll() {
+    let mut input = String::new();
+
     println!("How many d10 do you require?");
+    io::stdin().read_line(&mut input).expect("Failed to read input");
+    let dice: u8 = input.trim().parse().expect("Expected a number.");
+    input.clear();
+
     println!("What do you wish to add to your die roll?");
+    io::stdin().read_line(&mut input).expect("Failed to read input");
+    let modifier: u8 = input.trim().parse().expect("Expected a number.");
+    input.clear();
+
+    let mut total = modifier;
+    for _ in 0..dice {
+        total += rand::thread_rng().gen_range(1, 11);
+    }
+
+    println!("You rolled a total of {}.", total);
 }
 
 fn d100_roll() {
+    let mut input = String::new();
     println!("What do you wish to add to your die roll?");
+    io::stdin().read_line(&mut input).expect("Failed to read input");
+    let modifier: u8 = input.trim().parse().expect("Expected a number.");
+
+    let mut total = modifier;
+    total += rand::thread_rng().gen_range(1, 101);
+
+    println!("You rolled a total of {}.", total);
 }
