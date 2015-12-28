@@ -142,48 +142,50 @@ fn main() {
             "d10"    => d10_roll(),
             "d100"   => d100_roll(),
             _        => println!("Input not recognised: {}", answer.trim()),
-        }
+        };
     }
 }
 
 fn normal_roll() {
     let mut input = String::new();
 
-    println!("How many Ability dice (green d8) do you require?");
+    println!("Please enter the dice you need:");
+    println!("(use A for Ability dice, P for Proficiency dice, B for Boost dice,\n\
+              D for Difficulty dice, C for Challenge dice, S for setback dice and\n\
+              F for Force dice, like so: \"A2 P1 D3 F2\")");
     io::stdin().read_line(&mut input).expect("Failed to read input");
-    let ability: u8 = input.trim().parse().expect("Expected a number.");
-    input.clear();
 
-    println!("How many Proficiency dice (yellow d12) do you require?");
-    io::stdin().read_line(&mut input).expect("Failed to read input");
-    let proficiency: u8 = input.trim().parse().expect("Expected a number.");
-    input.clear();
+    let inputs: Vec<&str> = input.split_whitespace().collect();
 
-    println!("How many Boost dice (blue d6) do you require?");
-    io::stdin().read_line(&mut input).expect("Failed to read input");
-    let boost: u8 = input.trim().parse().expect("Expected a number.");
-    input.clear();
+    let mut ability = 0;
+    let mut proficiency = 0;
+    let mut boost = 0;
+    let mut difficulty = 0;
+    let mut challenge = 0;
+    let mut setback = 0;
+    let mut force = 0;
 
-    println!("How many Difficulty dice (purple d8) do you require?");
-    io::stdin().read_line(&mut input).expect("Failed to read input");
-    let difficulty: u8 = input.trim().parse().expect("Expected a number.");
-    input.clear();
+    for i in inputs {
+        let (code, number_as_str) = i.split_at(1);
+        let number = number_as_str.parse().expect("Incorrect Input");
+        match code {
+            "A" => ability += number,
+            "P" => proficiency += number,
+            "B" => boost += number,
+            "D" => difficulty += number,
+            "C" => challenge += number,
+            "S" => setback += number,
+            "F" => force += number,
+            _   => {},
+        };
+    }
 
-    println!("How many Challenge dice (red d12) do you require?");
-    io::stdin().read_line(&mut input).expect("Failed to read input");
-    let challenge: u8 = input.trim().parse().expect("Expected a number.");
-    input.clear();
+    roll_normal_dice(ability, proficiency, boost, difficulty, challenge,
+                     setback, force);
+}
 
-    println!("How many Setback dice (black d6) do you require?");
-    io::stdin().read_line(&mut input).expect("Failed to read input");
-    let setback: u8 = input.trim().parse().expect("Expected a number.");
-    input.clear();
-
-    println!("How many Force dice (white d12) do you require?");
-    io::stdin().read_line(&mut input).expect("Failed to read input");
-    let force: u8 = input.trim().parse().expect("Expected a number.");
-    input.clear();
-
+fn roll_normal_dice(ability: u8, proficiency: u8, boost: u8, difficulty: u8,
+                    challenge: u8, setback: u8, force: u8) {
     let mut hand = Vec::new();
 
     for _ in 0..ability {
@@ -245,12 +247,11 @@ fn normal_roll() {
         }
     }
 
-    println!("You rolled {} successes, {} advantage, {} triumphs,",
-             success, advantage, triumph);
-    println!("{} failures, {} threat, {} dispair,",
-             failure, threat, dispair);
-    println!("{} lightside force points and {} dark side force points.",
-             light, dark);
+    println!("You rolled {} successes, {} advantage, {} triumphs,\n\
+             {} failures, {} threat, {} dispair,\n\
+             {} light side force points and {} dark side force points.",
+             failure, threat, dispair, success, advantage, triumph, light,
+             dark);
 }
 
 fn d10_roll() {
